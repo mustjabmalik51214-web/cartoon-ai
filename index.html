@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Cartoon Video AI</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+    margin:0;
+    font-family:Arial,Helvetica,sans-serif;
+    background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+    color:#fff;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+}
+.container{
+    width:90%;
+    max-width:700px;
+    background:rgba(0,0,0,0.4);
+    padding:20px;
+    border-radius:12px;
+    text-align:center;
+}
+h1{margin-bottom:10px}
+input[type=file]{
+    margin:15px 0;
+}
+video{
+    width:100%;
+    border-radius:10px;
+    margin-top:10px;
+}
+button{
+    margin:10px;
+    padding:12px 20px;
+    border:none;
+    border-radius:8px;
+    font-size:16px;
+    cursor:pointer;
+    background:#00e6ff;
+    color:#000;
+}
+button:disabled{
+    background:#555;
+    cursor:not-allowed;
+}
+.progress{
+    margin-top:10px;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+    <h1>🎬 Cartoon Video AI</h1>
+    <p>Upload video → Convert to cartoon → Download</p>
+
+    <input type="file" id="videoInput" accept="video/*">
+
+    <video id="videoPreview" controls></video>
+
+    <div>
+        <button id="convertBtn">Convert to Cartoon</button>
+        <button id="downloadBtn" disabled>Download</button>
+    </div>
+
+    <div class="progress" id="status"></div>
+</div>
+
+<script>
+const input = document.getElementById("videoInput");
+const video = document.getElementById("videoPreview");
+const convertBtn = document.getElementById("convertBtn");
+const downloadBtn = document.getElementById("downloadBtn");
+const statusText = document.getElementById("status");
+
+let convertedVideoURL = null;
+
+input.onchange = () => {
+    const file = input.files[0];
+    if(file){
+        video.src = URL.createObjectURL(file);
+    }
+};
+
+convertBtn.onclick = async () => {
+    if(!input.files[0]) return alert("Upload a video first");
+
+    statusText.innerText = "⏳ Processing...";
+    convertBtn.disabled = true;
+
+    const formData = new FormData();
+    formData.append("video", input.files[0]);
+
+    const res = await fetch("http://localhost:3000/convert",{
+        method:"POST",
+        body:formData
+    });
+
+    const blob = await res.blob();
+    convertedVideoURL = URL.createObjectURL(blob);
+    video.src = convertedVideoURL;
+
+    statusText.innerText = "✅ Cartoon conversion done!";
+    downloadBtn.disabled = false;
+    convertBtn.disabled = false;
+};
+
+downloadBtn.onclick = () => {
+    const a = document.createElement("a");
+    a.href = convertedVideoURL;
+    a.download = "cartoon-video.mp4";
+    a.click();
+};
+</script>
+</body>
+</html>
