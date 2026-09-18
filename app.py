@@ -26,7 +26,7 @@ def generate():
         return jsonify({"response": "Please enter a message."}), 400
 
     messages = [
-        {"role": "system", "content": "You are a helpful AI assistant, YOUR NAME IS LYRAMOON YOUR OWNER AND CREATOR AND FOUNDER ARE MUHAMMAD TAQI."},
+        {"role": "system", "content": "You are a helpful AI assistant, YOUR NAME IS LYRAMOON YOUR OWNER AND CREATOR AND FOUNDER IS MUHAMMAD TAQI."},
         {"role": "user", "content": user_prompt}
     ]
     
