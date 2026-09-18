@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LyraMoon AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #030014;
+            --card-bg: rgba(15, 10, 30, 0.55);
+            --border-glow: rgba(236, 72, 153, 0.35);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --pink-accent: #ec4899;
+            --purple-accent: #a855f7;
+            --cyan-accent: #06b6d4;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Ambient Glowing Background Orbs */
+        .ambient-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.5;
+            z-index: 0;
+            animation: orbFloat 12s infinite alternate ease-in-out;
+        }
+        .orb-1 { width: 350px; height: 350px; background: var(--pink-accent); top: -50px; left: -50px; }
+        .orb-2 { width: 400px; height: 400px; background: var(--purple-accent); bottom: -100px; right: -50px; animation-delay: -6s; }
+        .orb-3 { width: 250px; height: 250px; background: var(--cyan-accent); top: 40%; left: 50%; transform: translate(-50%, -50%); opacity: 0.25; }
+
+        @keyframes orbFloat {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(30px, 50px) scale(1.15); }
+        }
+
+        /* Futuristic Glass Container */
+        .chat-container {
+            width: 100%;
+            max-width: 750px;
+            height: 88vh;
+            background: var(--card-bg);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 28px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8),
+                        0 0 40px rgba(168, 85, 247, 0.15);
+            z-index: 1;
+            position: relative;
+        }
+
+        /* Animated Glowing Border Overlay */
+        .chat-container::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 28px;
+            padding: 1.5px;
+            background: linear-gradient(135deg, var(--pink-accent), transparent, var(--purple-accent), var(--cyan-accent));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        /* Header Styling */
+        .chat-header {
+            padding: 22px 30px;
+            background: rgba(10, 5, 20, 0.6);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-info h2 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff 0%, #f472b6 50%, #c084fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-info p {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+        }
+
+        .header-info p span {
+            color: var(--pink-accent);
+            font-weight: 600;
+        }
+
+        /* Pulse Indicator */
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(236, 72, 153, 0.1);
+            border: 1px solid rgba(236, 72, 153, 0.3);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            color: #f472b6;
+            font-weight: 600;
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--pink-accent);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--pink-accent);
+            animation: pulse 1.8s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(236, 72, 153, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(236, 72, 153, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(236, 72, 153, 0); }
+        }
+
+        /* Chat Area */
+        .chat-box {
+            flex: 1;
+            overflow-y: auto;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            scroll-behavior: smooth;
+        }
+
+        .chat-box::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-box::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+        }
+
+        /* Animated Chat Bubbles */
+        .message-wrapper {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+            max-width: 82%;
+            animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px) scale(0.96); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .user-wrapper {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .bot-wrapper {
+            align-self: flex-start;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .bot-avatar {
+            background: linear-gradient(135deg, var(--pink-accent), var(--purple-accent));
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4);
+        }
+
+        .user-avatar {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .message {
+            padding: 15px 20px;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            word-wrap: break-word;
+            position: relative;
+        }
+
+        .user {
+            background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
+            color: #ffffff;
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 8px 20px rgba(236, 72, 153, 0.25);
+        }
+
+        .bot {
+            background: rgba(255, 255, 255, 0.04);
+            color: #e2e8f0;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-bottom-left-radius: 4px;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Typing Dots Indicator Animation */
+        .typing-indicator {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+            padding: 18px 22px;
+        }
+
+        .typing-dot {
+            width: 7px;
+            height: 7px;
+            background-color: var(--pink-accent);
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); opacity: 0.3; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Input Controls Area */
+        .input-box {
+            padding: 20px;
+            background: rgba(10, 5, 20, 0.6);
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .input-wrapper {
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        input {
+            width: 100%;
+            padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 16px;
+            color: #fff;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        input::placeholder {
+            color: #64748b;
+        }
+
+        input:focus {
+            background: rgba(255, 255, 255, 0.07);
+            border-color: var(--pink-accent);
+            box-shadow: 0 0 20px rgba(236, 72, 153, 0.25);
+        }
+
+        button {
+            width: 52px;
+            height: 52px;
+            background: linear-gradient(135deg, var(--pink-accent), var(--purple-accent));
+            color: #ffffff;
+            border: none;
+            border-radius: 16px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 6px 20px rgba(236, 72, 153, 0.35);
+            flex-shrink: 0;
+        }
+
+        button:hover {
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 10px 25px rgba(236, 72, 153, 0.5);
+        }
+
+        button:active {
+            transform: translateY(0) scale(0.97);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Glowing Background Orbs -->
+    <div class="ambient-orb orb-1"></div>
+    <div class="ambient-orb orb-2"></div>
+    <div class="ambient-orb orb-3"></div>
+
+    <div class="chat-container">
+        <!-- Header -->
+        <div class="chat-header">
+            <div class="header-info">
+                <h2><i class="fa-solid font-awesome fa-moon"></i> LyraMoon AI</h2>
+                <p>Designed & Crafted by <span>Muhammad Taqi</span></p>
+            </div>
+            <div class="status-badge">
+                <div class="pulse-dot"></div> Voice Active
+            </div>
+        </div>
+
+        <!-- Chat Scroll Area -->
+        <div class="chat-box" id="chatBox">
+            <div class="message-wrapper bot-wrapper">
+                <div class="avatar bot-avatar"><i class="fa-solid fa-sparkles"></i></div>
+                <div class="message bot">
+                    Greetings! I am <b>LyraMoon</b>. How may I illuminate your thoughts today?
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Bar -->
+        <div class="input-box">
+            <div class="input-wrapper">
+                <input type="text" id="userInput" placeholder="Ask LyraMoon anything..." onkeypress="if(event.key==='Enter') sendMessage()">
+            </div>
+            <button onclick="sendMessage()" id="sendBtn">
+                <i class="fa-solid fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Smooth Female Voice Output Engine
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); // Stop ongoing speech
+                
+                const utterance = new SpeechSynthesisUtterance(text);
+                const voices = window.speechSynthesis.getVoices();
+                
+                // Prioritize smooth high-quality female voices
+                const femaleVoice = voices.find(v => 
+                    v.name.includes("Google US English") || 
+                    v.name.includes("Samantha") || 
+                    v.name.includes("Zira") || 
+                    v.name.includes("Victoria") ||
+                    v.name.toLowerCase().includes("female")
+                );
+
+                if (femaleVoice) utterance.voice = femaleVoice;
+
+                utterance.pitch = 1.15; // Slightly elevated soft tone
+                utterance.rate = 0.98;   // Smooth natural cadence
+                
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        // Preload synthesis voices
+        window.speechSynthesis.onvoiceschanged = () => { window.speechSynthesis.getVoices(); };
+
+        async function sendMessage() {
+            const inputField = document.getElementById("userInput");
+            const chatBox = document.getElementById("chatBox");
+            const userText = inputField.value.trim();
+
+            if (!userText) return;
+
+            // Render User Message
+            chatBox.innerHTML += `
+                <div class="message-wrapper user-wrapper">
+                    <div class="avatar user-avatar"><i class="fa-solid fa-user"></i></div>
+                    <div class="message user">${userText}</div>
+                </div>
+            `;
+            
+            inputField.value = "";
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            // Render Animated Typing Dots
+            const loadingId = 'loading-' + Date.now();
+            chatBox.innerHTML += `
+                <div class="message-wrapper bot-wrapper" id="${loadingId}">
+                    <div class="avatar bot-avatar"><i class="fa-solid fa-sparkles"></i></div>
+                    <div class="message bot typing-indicator">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
+            `;
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            try {
+                const response = await fetch("/generate", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ prompt: userText })
+                });
+
+                const data = await response.json();
+                const botMessage = data.response;
+
+                // Replace typing indicator with actual response
+                const loadingElem = document.getElementById(loadingId);
+                loadingElem.querySelector('.message').innerHTML = botMessage;
+                loadingElem.querySelector('.message').classList.remove('typing-indicator');
+
+                // Trigger Female Speech Engine
+                speak(botMessage);
+
+            } catch (err) {
+                const errorText = "I encountered a connection glitch. Please try again.";
+                const loadingElem = document.getElementById(loadingId);
+                loadingElem.querySelector('.message').innerText = errorText;
+                loadingElem.querySelector('.message').classList.remove('typing-indicator');
+                speak(errorText);
+            }
+            
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+    </script>
+</body>
+</html>
