@@ -1,6 +1,6 @@
-# TinyLlama AI Agent
+# Lyramoon Qwen 2.5 AI Agent
 
-### 🚀 Live Demo (Auto-Updated Every 6 Hours)
-**Active URL:** [https://teenage-comic-albuquerque-been.trycloudflare.com](https://teenage-comic-albuquerque-been.trycloudflare.com)
+### 🚀 Live Demo (Auto-Updated Every 2 Hours)
+**Active URL:** [https://triumph-vector-lightbox-cashiers.trycloudflare.com](https://triumph-vector-lightbox-cashiers.trycloudflare.com)
 
-_Last Updated: Wed Sep 23 14:06:33 UTC 2026_
+_Last Updated: Wed Sep 23 14:48:49 UTC 2026_
