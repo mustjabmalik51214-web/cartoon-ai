@@ -4,11 +4,10 @@ from transformers import pipeline
 
 app = Flask(__name__)
 
-# Qwen ki jagah Google ka Gemma 1.1 2B Instruct model (No Token Required)
-print("Loading Google Gemma 1.1 2B Model...")
-pipe = pipeline(
+print("Loading Qwen1.5 0.5B Chat Model...")
+pipe = pipeline( 
     "text-generation",
-    model="google/gemma-1.1-2b-it",
+    model="Qwen/Qwen1.5-0.5B-Chat",
     torch_dtype=torch.float32,
     device_map="auto"
 )
@@ -56,16 +55,11 @@ Rules:
     
     generated_text = outputs[0]["generated_text"]
     
-    # Google Gemma format parsing update
-    if prompt in generated_text:
-        response = generated_text[len(prompt):].strip()
-    elif "<start_of_turn>model\n" in generated_text:
-        response = generated_text.split("<start_of_turn>model\n")[-1].strip()
+    # Qwen1.5 ChatML format handle karne ke liye parsing update
+    if "<|im_start|>assistant" in generated_text:
+        response = generated_text.split("<|im_start|>assistant")[-1].replace("<|im_end|>", "").strip()
     else:
         response = generated_text.strip()
-
-    # Gemma special end token cleaning
-    response = response.replace("<end_of_turn>", "").strip()
 
     return jsonify({"response": response})
 
