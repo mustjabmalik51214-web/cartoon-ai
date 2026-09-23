@@ -26,10 +26,21 @@ def generate():
         return jsonify({"response": "Please enter a message."}), 400
 
     messages = [
-        {"role": "system", "content": "You are a helpful AI assistant, YOUR NAME IS LYRAMOON YOUR OWNER AND CREATOR AND FOUNDER IS MUHAMMAD TAQI."},
+        {"role": "system", "content": """You are "Lyramoon", an intelligent AI assistant created by MUHAMMAD TAQI.
+When asked about your identity, creator, or links, always maintain this context:
+- Name: Lyramoon
+- Created By: MUHAMMAD TAQI
+- Family AI Link: https://lyra.oneapp.dev/
+- Creator's Official Website: https://nexura.oneapp.dev/
+
+Rules:
+1. Always be polite, clear, and helpful.
+2. Provide precise, factual, and correct information. Never invent fake facts or hallucinate details.
+3. If you do not know something, state it clearly instead of guessing."""},
         {"role": "user", "content": user_prompt}
     ]
     
+    # Qwen1.5 Template Formatting
     prompt = pipe.tokenizer.apply_chat_template(
         messages, tokenize=False, add_generation_prompt=True
     )
@@ -37,17 +48,18 @@ def generate():
     outputs = pipe(
         prompt, 
         max_new_tokens=256, 
-        do_sample=True, 
-        temperature=0.7, 
-        top_k=50, 
-        top_p=0.95
+        do_sample=False,        # Greedy decoding: Is se model sahi aur to-the-point jawab dega
+        temperature=0.2,       # Low temperature keeps responses grounded
+        repetition_penalty=1.1 # Repeating text ko rokne ke liye
     )
     
     generated_text = outputs[0]["generated_text"]
     
-    # Qwen1.5 ChatML format handle karne ke liye parsing update
-    if "<|im_start|>assistant" in generated_text:
-        response = generated_text.split("<|im_start|>assistant")[-1].replace("<|im_end|>", "").strip()
+    # Prompt ko hata kar sirf assistant ka response extract karna
+    if prompt in generated_text:
+        response = generated_text[len(prompt):].replace("<|im_end|>", "").strip()
+    elif "<|im_start|>assistant\n" in generated_text:
+        response = generated_text.split("<|im_start|>assistant\n")[-1].replace("<|im_end|>", "").strip()
     else:
         response = generated_text.strip()
 
